@@ -5,7 +5,7 @@ from leaflet.admin import LeafletGeoAdmin
 
 
 class LocationAdmin(LeafletGeoAdmin):
-    list_display = ('text', 'created_at', 'type', 'coordinates')
+    list_display = ('text', 'created_at', 'types')
 
 
 admin.site.register(Location, LocationAdmin)

@@ -4,8 +4,10 @@ from django.contrib.gis.db import models
 
 
 class Location(models.Model):
-    text = models.CharField(max_length=255)
-    created_at = models.DateTimeField()
-    coordinates = models.PointField(srid=4326)
-    objects = models.GeoManager()
-    type = models.CharField(max_length=255)
+    text = models.CharField(max_length=142)
+    created_at = models.DateField()
+    types = models.CharField(max_length=80)
+    geom = models.MultiPointField(srid=4326)
+
+    def __unicode__(self):
+        return self.text
