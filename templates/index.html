@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+{% load leaflet_tags %}
+<head>
+    {% leaflet_js %}
+    {% leaflet_css %}
+    <style type="text/css">
+        #map {
+            width: 100%;
+            height: 500px;
+        }
+        #stuff {
+            left: 50%;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script type="text/javascript" src="{% static 'dist/leaflet.ajax.js' %}" >	</script>
+</head>
+<body>
+<div class="" id="stuff">
+    <label>From</label>
+    <input type="date" id="from-date" min="1950-04-01" max="2050-04-01" required>
+    <span class="validity"></span>
+    <label>To</label>
+    <input type="date" id="to-date" min="1950-04-01" max="2050-04-01" required>
+    <span class="validity"></span>
+    <label>Text Search</label>
+    <input name="text-entry" id="text-area">
+    <input type="radio" onchange="radio_checked(this)" value="flu" id="flu" >flu</input>
+    <input type="radio" onchange="radio_checked(this)" value="cholera" id="cholera">cholera</input>
+    <input type="radio" onchange="radio_checked(this)" value="diphtheria" id="diphtheria">diphtheria</input>
+    <input type="radio" onchange="radio_checked(this)" value="norovirus" id="norovirus">norovirus</input>
+    <button type="submit" onclick="button_clicked()">Submit</button>
+</div>
+<br></br>
+<div id="map">
+</div>
+<script type="text/javascript">
+    var map = L.map('map').setView([42.736424, -73.762713], 10);
+
+    var osm = new L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        defaultZoom: 5,
+        maxZoom: 20,
+        minZoom: 3,
+        scale: 'both',
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    });
+
+    osm.addTo(map);
+
+    var datas = new L.GeoJSON.AJAX("{% url 'location' %}",{
+            onEachFeature: function(feature, layer){
+                layer.bindPopup(feature.properties.text.toString() + "<br></br>" + feature.properties.types.toString());
+            }
+    }).addTo(map);
+
+    var my_datas = new L.GeoJSON.AJAX("{% url 'location' %}");
+
+    document.getElementById('from-date').valueAsDate = new Date();
+    document.getElementById('to-date').valueAsDate = new Date();
+
+    function radio_checked(checkboxElem) {
+        map.removeLayer(datas);
+        my_datas.addData(filter_layer(checkboxElem.id))
+    }
+
+    function filter_layer(disease_type) {
+	    var geoJSONLayer = new L.GeoJSON.AJAX("{% url 'location' %}", {
+	        filter: function (feature, layer) {
+	            if (disease_type === "flu"){
+                    return feature.properties.types === "flu";
+                }
+                else if(disease_type === "cholera"){
+                    return feature.properties.types === "cholera";
+                }
+                else if(disease_type === "diphtheria"){
+                    return feature.properties.types === "diphtheria";
+                }
+                else{
+                    return feature.properties.types === "norovirus";
+                }
+            },
+            onEachFeature: function (feature, layer) {
+                layer.bindPopup(feature.properties.text.toString() + "<br></br>" + feature.properties.types.toString());
+            }
+        }).addTo(map);
+	    return geoJSONLayer
+    }
+
+    function isChecked(radiobuttonElem) {
+        return radiobuttonElem.checked;
+    }
+
+    function isDateSelected() {
+        var today = new Date();
+        var fromDate = new Date(document.getElementById("from-date").value);
+        var d = new Date("April 01, 1950 11:13:00");
+        var toDate = new Date(document.getElementById("to-date").value);
+        if ((fromDate > today) || (toDate > today) || (toDate < d) || (fromDate < d) || (fromDate > toDate)) {
+            return false
+        }
+    }
+
+    function button_clicked() {
+        var selectedVariants = [];
+        $("input[type=radio]:checked").each(function () {
+            selectedVariants += ($(this).val()) + ',';
+            selectedVariants = selectedVariants.split(',');
+        });
+        if (isDateSelected() === false) {
+            window.alert("Please enter a valid birthday");
+        }
+        map.removeLayer(datas);
+        if (my_datas){
+            map.removeLayer(my_datas);
+        }
+        var fromDate = new Date(document.getElementById("from-date").value);
+        var toDate = new Date(document.getElementById("to-date").value);
+        var geoJSONLayer = new L.GeoJSON.AJAX("{% url 'location' %}", {
+            filter: function (feature, layer) {
+                if (document.getElementById("text-area").value !== ""){
+                    for(var stuff in selectedVariants){
+                        if ((feature.properties.text.includes(document.getElementById("text-area").value)) && (feature.properties.types.toString() === selectedVariants[stuff])){
+                            return feature.properties.types.toString() === selectedVariants[stuff];
+                        }
+                    }
+                }
+                else{
+
+                }
+            },
+            onEachFeature: function (feature, layer) {
+                layer.bindPopup(feature.properties.text.toString() + "<br></br>" + feature.properties.types.toString());
+            }
+        }).addTo(map);
+    }
+
+        /*
+        var baseLayers = {
+            "OSM": osm
+        };
+        var groupedOverlays = {
+            "Layers": {
+                "location": datas
+            }};
+	    L.control.groupedLayers(baseLayers, groupedOverlays).addTo(map);
+    function checkbox_checker(checkboxElem) {
+        if (checkboxElem.checked){
+
+            var geoJSONLayer = new L.GeoJSON.AJAX("% url 'location' %}");
+            geoJSONLayer.clearLayers();
+        }
+        else {
+            window.alert("bye")
+        }
+        (fromDate < feature.properties.created_at < toDate)
+    }
+    */
+
+</script>
+</body>
+</html>
