@@ -9,6 +9,10 @@ class HomePageView(TemplateView):
     template_name = 'index.html'
 
 
+class TheRealHomePageView(TemplateView):
+    template_name = 'home.html'
+
+
 def location_dataset(request):
     location = serialize('geojson', Location.objects.all())
     return HttpResponse(location, content_type='json')
