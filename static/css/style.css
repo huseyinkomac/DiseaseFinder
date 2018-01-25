@@ -52,9 +52,8 @@ a:hover {
     outline-offset: -4px;
   }
 
-
 #stuff{
-    padding-top: 180px;
+    padding-top: 10px;
     background: url("/static/img/header.png");
     background-position: 15% 80%;
     background-repeat: no-repeat;
@@ -112,6 +111,15 @@ button {
     outline: 1px dotted #959595;
     outline-offset: -4px;
   }
+
+#stuff2{
+    padding-top: 180px;
+}
+
+.yourbutton{
+    width: 15%;
+    margin: 0 auto;
+}
 
 
 .mybutton{

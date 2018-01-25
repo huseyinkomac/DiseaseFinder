@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 {% load static %}
+{% load leaflet_tags %}
 <head>
+    {% leaflet_js %}
+    {% leaflet_css %}
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/static/css/style.css"/>
+    <link rel="stylesheet" type="text/css" href="/static/css/leaflet.pm.css"/>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="{% static 'dist/leaflet.ajax.js' %}" >	</script>
+    <script type="text/javascript" src="{% static 'dist/leaflet.pm.min.js' %}" >	</script>
 </head>
 <body>
 <nav class="gtco-nav" role="navigation">
@@ -23,6 +28,91 @@
 			</div>
 		</div>
 	</nav>
+<br><br><br>
+<div class="row">
+<div class="col-lg-7" id="map"></div>
+<div class="col-lg-5" id="stuff2">
+    <div class="yourbutton">
+            <button type="submit" onclick="button_clicked()">SEARCH</button>
+    </div>
+</div>
+</div>
+<script type="text/javascript">
+    var map = L.map('map').setView([42.736424, -73.762713], 10);
+
+    var osm = new L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        defaultZoom: 5,
+        maxZoom: 20,
+        minZoom: 3,
+        scale: 'both',
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    });
+
+    osm.addTo(map);
+
+    var datas = new L.GeoJSON.AJAX("{% url 'location' %}",{
+            onEachFeature: function(feature, layer){
+                layer.bindPopup("Text: " + feature.properties.text.toString() + "<br>" + "Type: " + jsUcfirst(feature.properties.types.toString()) + "<br>" + "Date of Creation: " + feature.properties.created_at);
+            }
+    }).addTo(map);
+
+    var options = {
+        position: 'topright',
+        drawMarker: false,
+        drawPolyline: false,
+        drawRectangle: true,
+        drawPolygon: false,
+        drawCircle: false,
+        cutPolygon: false,
+        editMode: true,
+        removalMode: true
+    };
+    map.pm.addControls(options);
+
+    var edit_enabled;
+    var my_rectangle = "not_legit";
+
+    map.on('pm:globaleditmodetoggled', function(e) {
+        map.eachLayer(function (layer) {
+            if(layer instanceof L.Rectangle){
+                my_rectangle = [[layer._bounds._northEast.lat, layer._bounds._northEast.lng], [layer._bounds._southWest.lat, layer._bounds._southWest.lng]];
+                edit_enabled = e.enabled;
+            }
+        })
+    });
+
+    map.on('pm:create', function (e) {
+        map.pm.removeControls();
+        options.drawRectangle = false;
+        map.pm.addControls(options);
+        my_rectangle = [[e.layer._bounds._northEast.lat, e.layer._bounds._northEast.lng], [e.layer._bounds._southWest.lat, e.layer._bounds._southWest.lng]];
+    });
+
+    map.on('pm:remove', function(e) {
+        if(e.layer instanceof L.Rectangle){
+            map.pm.removeControls();
+            options.drawRectangle = true;
+            map.pm.addControls(options);
+            my_rectangle = "not_legit";
+        }
+    });
+
+    function jsUcfirst(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+    function button_clicked() {
+        if ((my_rectangle === "not_legit") || (edit_enabled === true)){
+            console.log("hey")
+        }
+
+    }
+
+</script>
 </body>
+<!--
+var my_rectangle = [[18.4, 12.5], [5.5, 20.9]];
+    L.rectangle(my_rectangle).addTo(map);
+console.log(e.layer._bounds._northEast.lat)
+-->
 
 </html>

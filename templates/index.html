@@ -30,6 +30,10 @@
 <div class="col-lg-7" id="map">
 </div>
 <div class="col-lg-5" id="stuff">
+    <div>
+        <b style="padding-left: 20%"><i>This section is for all gathered data on this subject!!</i></b>
+    </div>
+    <br></br>
     <div class="dates">
             <label for="from-date">From</label>
         <input type="date" id="from-date" min="1950-04-01" max="2050-04-01" required>
@@ -41,7 +45,6 @@
     <br></br>
     <div class="text-area">
             <span class="glyphicon glyphicon-search"></span>
-        <label for="text-area"></label>
             <input name="text-entry" type ="text" id="text-area">
         </div>
     <br></br>
@@ -76,7 +79,7 @@
 
     var datas = new L.GeoJSON.AJAX("{% url 'location' %}",{
             onEachFeature: function(feature, layer){
-                layer.bindPopup(feature.properties.text.toString() + "<br></br>" + feature.properties.types.toString());
+                layer.bindPopup("Text: " + feature.properties.text.toString() + "<br>" + "Type: " + jsUcfirst(feature.properties.types.toString()) + "<br>" + "Date of Creation: " + feature.properties.created_at);
             }
     }).addTo(map);
 
@@ -105,7 +108,7 @@
                 }
             },
             onEachFeature: function (feature, layer) {
-                layer.bindPopup(feature.properties.text.toString() + "<br></br>" + feature.properties.types.toString());
+                layer.bindPopup("Text: " + feature.properties.text.toString() + "<br>" + "Type: " + jsUcfirst(feature.properties.types.toString()) + "<br>" + "Date of Creation: " + feature.properties.created_at);
             }
         }).addTo(map);
     }
@@ -118,6 +121,10 @@
         if ((fromDate > today) || (toDate > today) || (toDate < d) || (fromDate < d) || (fromDate > toDate)) {
             return false
         }
+    }
+
+    function jsUcfirst(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
     function button_clicked() {
@@ -136,23 +143,37 @@
         osm.addTo(map);
         var lastGeoJSON = new L.GeoJSON.AJAX("{% url 'location' %}", {
             filter: function (feature, layer) {
-                if (document.getElementById("text-area").value !== ""){
-                    for(var stuff in selectedVariants){
-                        if ((feature.properties.text.includes(document.getElementById("text-area").value)) && (feature.properties.types.toString() === selectedVariants[stuff]) && (document.getElementById("from-date").value <= feature.properties.created_at) && (feature.properties.created_at <= document.getElementById("to-date").value)){
-                            return feature.properties.types.toString() === selectedVariants[stuff];
-                        }
+                if(selectedVariants.length === 0){
+                    if ((document.getElementById("text-area").value !== "") && (document.getElementById("from-date").value <= feature.properties.created_at) && (feature.properties.created_at <= document.getElementById("to-date").value)){
+                        return feature.properties.text.includes(document.getElementById("text-area").value)
+                    }
+                    else if((document.getElementById("from-date").value <= feature.properties.created_at) && (feature.properties.created_at <= document.getElementById("to-date").value)){
+                        return feature
+                    }
+                    else{
+                        return false
                     }
                 }
                 else{
-                    for (var stuff in selectedVariants){
-                        if((feature.properties.types.toString() === selectedVariants[stuff]) && (document.getElementById("from-date").value <= feature.properties.created_at) && (feature.properties.created_at <= document.getElementById("to-date").value)){
+                    if (document.getElementById("text-area").value !== ""){
+                        for(var stuff in selectedVariants){
+                            if ((feature.properties.text.includes(document.getElementById("text-area").value)) && (feature.properties.types.toString() === selectedVariants[stuff]) && (document.getElementById("from-date").value <= feature.properties.created_at) && (feature.properties.created_at <= document.getElementById("to-date").value)){
+                                return feature.properties.types.toString() === selectedVariants[stuff];
+                                }
+                        }
+                    }
+                    else{
+                        for (var stuff in selectedVariants){
+                            if((feature.properties.types.toString() === selectedVariants[stuff]) && (document.getElementById("from-date").value <= feature.properties.created_at) && (feature.properties.created_at <= document.getElementById("to-date").value)){
                             return feature.properties.types.toString() === selectedVariants[stuff];
+                            }
                         }
                     }
                 }
+
             },
             onEachFeature: function (feature, layer) {
-                layer.bindPopup(feature.properties.text.toString() + "<br></br>" + feature.properties.types.toString());
+                layer.bindPopup("Text: " + feature.properties.text.toString() + "<br>" + "Type: " + jsUcfirst(feature.properties.types.toString()) + "<br>" + "Date of Creation: " + feature.properties.created_at);
             }
         }).addTo(map);
     }
