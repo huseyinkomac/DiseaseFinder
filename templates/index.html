@@ -3,6 +3,7 @@
 {% load static %}
 {% load leaflet_tags %}
 <head>
+    <title>Maps</title>
     {% leaflet_js %}
     {% leaflet_css %}
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -30,8 +31,8 @@
 <div class="col-lg-7" id="map">
 </div>
 <div class="col-lg-5" id="stuff">
-    <div>
-        <b style="padding-left: 20%"><i>This section is for all gathered data on this subject!!</i></b>
+    <div class="label_area">
+        <label><i>This section is for all gathered data on this subject!!</i></label>
     </div>
     <br></br>
     <div class="dates">
@@ -65,7 +66,7 @@
 </div>
 </div>
 <script type="text/javascript">
-    var map = L.map('map').setView([42.736424, -73.762713], 10);
+    var map = L.map('map').setView([34.764321, -63.159494], 2);
 
     var osm = new L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         defaultZoom: 5,
@@ -83,8 +84,8 @@
             }
     }).addTo(map);
 
-    document.getElementById('from-date').valueAsDate = new Date();
-    document.getElementById('to-date').valueAsDate = new Date();
+    document.getElementById('from-date').valueAsDate = new Date(2018,0,27);
+    document.getElementById('to-date').valueAsDate = new Date(2018,0,27);
 
     function radio_checked(checkboxElem) {
         map.removeLayer(datas);
@@ -114,7 +115,7 @@
     }
 
     function isDateSelected() {
-        var today = new Date();
+        var today = new Date(2018,0,27);
         var fromDate = new Date(document.getElementById("from-date").value);
         var d = new Date("April 01, 1950 11:13:00");
         var toDate = new Date(document.getElementById("to-date").value);
@@ -177,28 +178,6 @@
             }
         }).addTo(map);
     }
-
-        /*
-        var baseLayers = {
-            "OSM": osm
-        };
-        var groupedOverlays = {
-            "Layers": {
-                "location": datas
-            }};
-	    L.control.groupedLayers(baseLayers, groupedOverlays).addTo(map);
-    function checkbox_checker(checkboxElem) {
-        if (checkboxElem.checked){
-
-            var geoJSONLayer = new L.GeoJSON.AJAX("% url 'location' %}");
-            geoJSONLayer.clearLayers();
-        }
-        else {
-            window.alert("bye")
-        }
-        (fromDate < feature.properties.created_at < toDate)
-    }
-    */
 
 </script>
 </body>

@@ -3,6 +3,7 @@
 {% load static %}
 {% load leaflet_tags %}
 <head>
+    <title>Home</title>
     {% leaflet_js %}
     {% leaflet_css %}
     <meta charset="UTF-8">
@@ -32,16 +33,26 @@
 <div class="row">
 <div class="col-lg-7" id="map"></div>
 <div class="col-lg-5" id="stuff2">
+    <div class="label_area_2">
+        <label><i>This section is the prediction part of the project! Create a rectangle by clicking the top-right button on the map! You can edit it or delete it! After creating it click Search button for the predictions!</i></label>
+    </div>
     <div class="yourbutton">
             <button type="submit" onclick="button_clicked()">SEARCH</button>
+    </div>
+    <div class="hidden_stuff" id="hidden_stuff">
+        <label id="flu_label" hidden><i></i></label><br>
+        <label id="cholera_label" hidden><i></i></label><br>
+        <label id="diphtheria_label" hidden><i></i></label><br>
+        <label id="norovirus_label" hidden><i></i></label>
     </div>
 </div>
 </div>
 <script type="text/javascript">
-    var map = L.map('map').setView([42.736424, -73.762713], 10);
+    var map = L.map('map').setView([34.764321, -63.159494], 2);
+
 
     var osm = new L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        defaultZoom: 5,
+        defaultZoom: 10,
         maxZoom: 20,
         minZoom: 3,
         scale: 'both',
@@ -100,19 +111,130 @@
     function jsUcfirst(string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
-    function button_clicked() {
-        if ((my_rectangle === "not_legit") || (edit_enabled === true)){
-            console.log("hey")
-        }
 
+    function button_clicked() {
+        var my_types = [];
+        var my_dates =[];
+        if(edit_enabled === true){
+            window.alert("Please finish editing first!!")
+        }
+        if (my_rectangle === "not_legit"){
+            window.alert("Please create a rectangle first!!")
+        }
+        map.eachLayer(function (layer) {
+            if(layer instanceof L.Marker){
+                var my_point = [layer._latlng.lat, layer._latlng.lng];
+                if(find_if_its_inside(my_point, my_rectangle)){
+                    my_types.push(layer.pm._layerGroup.feature.properties.types);
+                    my_dates.push(layer.pm._layerGroup.feature.properties.created_at);
+                }
+            }
+        });
+        if((my_types.length > 0) && (my_dates.length > 0)){
+            make_predictions(my_types, my_dates);
+        }
+        else{
+            window.alert("Please create a rectangle that has points inside!!")
+        }
+    }
+
+    function find_if_its_inside(point, vs) {
+        var x = point[0], y = point[1];
+        var inside = false;
+        var xi = vs[0][0], yi = vs[0][1];
+        var xj = vs[1][0], yj = vs[1][1];
+        var intersect = ((yi > y) !== (yj > y)) && ((xi > x) !== (xj > x));
+        if(intersect){
+            inside = !inside;
+        }
+        return inside;
+    }
+
+    function formatDate(date) {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+
+        return [year, month, day].join('-');
+    }
+
+    function find_days() {
+        var today = new Date(2018,0,26);
+        var array = [];
+        array.push(formatDate(today.setDate(today.getDate())));
+        for (var i = 1, j = 3; i < 9; i = i + 1){
+            array[i] = formatDate(today.setDate(today.getDate() - j));
+        }
+        return array;
+    }
+
+    function make_predictions(types, dates) {
+        var days_array = find_days();
+        var flu_array = new Array(8+1).join('0').split('').map(parseFloat);
+        var cholera_array = new Array(8+1).join('0').split('').map(parseFloat);
+        var diphtheria_array = new Array(8+1).join('0').split('').map(parseFloat);
+        var norovirus_array = new Array(8+1).join('0').split('').map(parseFloat);
+        for(var a = 0; a < types.length; a = a + 1){
+            if(types[a] === "flu") {
+                for (var i = 0, j = 7; i < 8; i = i + 1, j = j - 1){
+                    if ((dates[a] <= days_array[i]) && (dates[a] > days_array[i+1])) {
+                        flu_array[j] = flu_array[j] + 1;
+                    }
+                }
+            }
+            else if(types[a] === "cholera"){
+                for (var k = 0, l = 7; k < 8; k = k + 1, l = l - 1){
+                    if ((dates[a] <= days_array[k]) && (dates[a] > days_array[k+1])) {
+                        cholera_array[l] = cholera_array[l] + 1;
+                    }
+                }
+            }
+            else if(types[a] === "diphtheria"){
+                for (var m = 0, n = 7; m < 8; m = m + 1, n = n - 1){
+                    if ((dates[a] <= days_array[m]) && (dates[a] > days_array[m+1])) {
+                        diphtheria_array[n] = diphtheria_array[n] + 1;
+                    }
+                }
+            }
+            else{
+                for (var x = 0, y = 7; x < 8; x = x + 1, y = y - 1){
+                    if ((dates[a] <= days_array[x]) && (dates[a] > days_array[x+1])) {
+                        norovirus_array[y] = norovirus_array[y] + 1;
+                    }
+                }
+            }
+        }
+        do_predictions_for_sure_this_time(flu_array, "flu");
+        do_predictions_for_sure_this_time(cholera_array, "cholera");
+        do_predictions_for_sure_this_time(diphtheria_array, "diphtheria");
+        do_predictions_for_sure_this_time(norovirus_array, "norovirus");
+    }
+
+    function do_predictions_for_sure_this_time(array, name) {
+        var percentage;
+        var my_count = 0;
+        for (var i = 0; i < 7; i++){
+            my_count += array[i];
+        }
+        my_count = (my_count / 7).toFixed(1);
+        if(array[7] <= my_count){
+            percentage = (my_count - array[7] / my_count)*100;
+        }
+        if(array[7] > my_count){
+            percentage = ((array[7] - my_count) / my_count)*100;
+        }
+        if(percentage > 100){
+            percentage = 100;
+        }
+        var my_label = name + "_label";
+        document.getElementById(my_label).innerHTML = "In this area on average " + my_count + " people are talking about " + name + ". In last 3 days " + array[7] + " people talked about it. So the risk of an outbreak is %" + percentage.toFixed(1) + ".";
+        document.getElementById(my_label).removeAttribute("hidden");
     }
 
 </script>
 </body>
-<!--
-var my_rectangle = [[18.4, 12.5], [5.5, 20.9]];
-    L.rectangle(my_rectangle).addTo(map);
-console.log(e.layer._bounds._northEast.lat)
--->
-
 </html>

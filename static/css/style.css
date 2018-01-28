@@ -52,8 +52,13 @@ a:hover {
     outline-offset: -4px;
   }
 
+.hidden_stuff{
+    width: 90%;
+    margin: 0 auto;
+}
+
 #stuff{
-    padding-top: 10px;
+    padding-top: 140px;
     background: url("/static/img/header.png");
     background-position: 15% 80%;
     background-repeat: no-repeat;
@@ -113,7 +118,7 @@ button {
   }
 
 #stuff2{
-    padding-top: 180px;
+    padding-top: 100px;
 }
 
 .yourbutton{
@@ -121,6 +126,20 @@ button {
     margin: 0 auto;
 }
 
+.label_area_2_hidden{
+    width: 90%;
+    margin: 0 auto;
+}
+
+.label_area_2{
+    width: 90%;
+    margin: 0 auto;
+}
+
+.label_area{
+    width: 70%;
+    margin: 0 auto;
+}
 
 .mybutton{
     width: 15%;
