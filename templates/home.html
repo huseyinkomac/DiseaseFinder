@@ -48,7 +48,7 @@
 </div>
 </div>
 <script type="text/javascript">
-    var map = L.map('map').setView([34.764321, -63.159494], 2);
+    var map = L.map('map').setView([36.8369468,-92.1936257], 2);
 
 
     var osm = new L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -221,8 +221,8 @@
             my_count += array[i];
         }
         my_count = (my_count / 7).toFixed(1);
-        if(array[7] <= my_count){
-            percentage = (my_count - array[7] / my_count)*100;
+        if(array[7] < my_count){
+            percentage = ((my_count - array[7]) / my_count)*100;
         }
         if(array[7] > my_count){
             percentage = ((array[7] - my_count) / my_count)*100;
@@ -231,7 +231,7 @@
             percentage = 100;
         }
         var my_label = name + "_label";
-        document.getElementById(my_label).innerHTML = "In this area on average " + my_count + " people are talking about " + name + ". In last 3 days " + array[7] + " people talked about it. So the risk of an outbreak is %" + percentage.toFixed(1) + ".";
+        document.getElementById(my_label).innerHTML = "<i>In this area on average " + my_count + " people are talking about " + name + ". In last 3 days " + array[7] + " people talked about it. So the risk of an outbreak is %" + percentage.toFixed(1) + ".</i>";
         document.getElementById(my_label).removeAttribute("hidden");
     }
 
